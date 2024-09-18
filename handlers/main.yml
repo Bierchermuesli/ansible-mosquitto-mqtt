@@ -1,0 +1,10 @@
+---
+- name: Restart mosquitto
+  ansible.builtin.service:
+    name: mosquitto
+    state: restarted
+
+- name: Restart fail2ban
+  ansible.builtin.service:
+    name: fail2ban
+    state: restarted

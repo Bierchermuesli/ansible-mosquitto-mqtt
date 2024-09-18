@@ -1,0 +1,5 @@
+---
+mosquitto_users: []
+mosquitto_tls: []
+mqtt_bridges: []
+fail2ban_enbaled: false

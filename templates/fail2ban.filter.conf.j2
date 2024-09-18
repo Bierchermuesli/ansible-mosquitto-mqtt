@@ -1,0 +1,12 @@
+# {{ ansible_managed }}
+[INCLUDES]
+# Read common prefixes. If any customizations available -- read them from
+# common.local
+before = common.conf
+
+
+[Definition]
+maxlines = 10
+failregex = ^New connection from (?P<cid><ADDR>:\d+) [^\n]*<SKIPLINES>^%(_prefix_line)s <F-NOFAIL>New client connected</F-NOFAIL> from (?P=cid) as
+            ^New connection from <ADDR>:\d+ [^\n]*<SKIPLINES>^%(_prefix_line)s Client \S+ (?:<F-NOFAIL>closed its connection</F-NOFAIL>|disconnected[,:]? (?:not authorised|(?:due to )?[pP]rotocol error))\.
+journalmatch = _SYSTEMD_UNIT=mosquitto.service

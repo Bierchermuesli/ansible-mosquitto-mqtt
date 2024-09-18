@@ -1,0 +1,55 @@
+---
+- name: Server package is present
+  ansible.builtin.apt:
+    name:
+      - mosquitto
+      - mosquitto-clients
+    state: present
+  tags:
+    - install
+
+- name: Service exists
+  ansible.builtin.service:
+    name: mosquitto
+    enabled: true
+  tags:
+    - install
+
+- name: Password file exists
+  ansible.builtin.file:
+    path: /etc/mosquitto/passwd
+    state: touch
+  tags:
+    - install
+  when: mosquitto_users
+
+- name: Render User database
+  ansible.builtin.command: mosquitto_passwd -b /etc/mosquitto/passwd {{ item.name | quote }} {{ item.password | quote }}
+  notify:
+    - Restart mosquitto
+  loop: "{{ mosquitto_users }}"
+  tags:
+    - config
+  when: mosquitto_users
+
+- name: Create mosquitto.conf
+  ansible.builtin.template:
+    src: templates/mosquitto.conf
+    dest: /etc/mosquitto/mosquitto.conf
+  tags:
+    - config
+  notify:
+    - Restart mosquitto
+
+- name: Install fail2ban rules
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - { src: fail2ban.filter.conf.j2, dest: /etc/fail2ban/filter.d/mosquitto-auth.conf }
+    - { src: fail2ban.jail.conf.j2, dest: /etc/fail2ban/jail.d/mosquitto.conf }
+  notify:
+    - Restart fail2ban
+  tags:
+    - install
+  when: fail2ban_enabled
